@@ -18,6 +18,7 @@ func main() {
 	//auth := g.Group("/auth")
 
 	g.POST("/signup", controllers.Signup)
+	g.POST("/login", controllers.Login)
 
 	g.Run(os.Getenv("PORT"))
 

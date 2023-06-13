@@ -12,11 +12,13 @@ import (
 	"time"
 )
 
+type Body struct {
+	Email    string
+	Password string
+}
+
 func Signup(c *gin.Context) {
-	var body struct {
-		Email    string
-		Password string
-	}
+	body := Body{}
 	if c.Bind(&body) != nil {
 		ResponseErrorWrapper(c, http.StatusBadRequest, "Failed to read body")
 		return
@@ -45,6 +47,40 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"data": jToken,
 	})
+}
+
+func Login(c *gin.Context) {
+	body := Body{}
+	if c.Bind(&body) != nil {
+		ResponseErrorWrapper(c, http.StatusBadRequest, "Failed to read body")
+		return
+	}
+
+	var user models.User
+
+	initializers.DB.First(&user, "email = ?", body.Email)
+	if user.ID == 0 {
+		ResponseErrorWrapper(c, http.StatusBadRequest, "invalid email or password e")
+		return
+	}
+	// todo [bug] user.password is empty!
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
+	if err != nil {
+		ResponseErrorWrapper(c, http.StatusBadRequest, "invalid email or password p")
+		return
+	}
+
+	jToken, err := createJwt(user.ID)
+	if err != nil {
+		ResponseErrorWrapper(c, http.StatusInternalServerError, "Failed to create Token")
+		log.Fatal(err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"data": jToken,
+	})
+
 }
 
 func ResponseErrorWrapper(c *gin.Context, code int, message string) {
