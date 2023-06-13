@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"go-jwt/controllers"
 	"go-jwt/initializers"
-	"net/http"
 	"os"
 )
 
@@ -15,12 +15,10 @@ func init() {
 
 func main() {
 	g := gin.Default()
+	//auth := g.Group("/auth")
 
-	g.GET("/", func(context *gin.Context) {
-		context.JSON(http.StatusOK, gin.H{
-			"message": "Hello",
-		})
-	})
+	g.POST("/signup", controllers.Signup)
 
 	g.Run(os.Getenv("PORT"))
+
 }
