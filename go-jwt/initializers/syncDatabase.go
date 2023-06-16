@@ -1,7 +1,13 @@
 package initializers
 
-import "go-jwt/models"
+import (
+	"fmt"
+	"go-jwt/models"
+)
 
 func SyncDatabase() {
-	DB.AutoMigrate(&models.User{})
+	err := DB.AutoMigrate(&models.User{})
+	if err != nil {
+		fmt.Println(err)
+	}
 }

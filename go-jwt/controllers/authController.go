@@ -58,15 +58,15 @@ func Login(c *gin.Context) {
 
 	var user models.User
 
-	initializers.DB.First(&user, "email = ?", body.Email)
+	initializers.DB.Preload("Password").First(&user, "email = ?", body.Email)
 	if user.ID == 0 {
-		ResponseErrorWrapper(c, http.StatusBadRequest, "invalid email or password e")
+		ResponseErrorWrapper(c, http.StatusBadRequest, "Invalid email or password")
 		return
 	}
-	// todo [bug] user.password is empty!
+
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
-		ResponseErrorWrapper(c, http.StatusBadRequest, "invalid email or password p")
+		ResponseErrorWrapper(c, http.StatusBadRequest, "Invalid email or password")
 		return
 	}
 
@@ -80,7 +80,6 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"data": jToken,
 	})
-
 }
 
 func ResponseErrorWrapper(c *gin.Context, code int, message string) {
